@@ -3,6 +3,7 @@
 angular.module('angular-google-analytics', [])
   .provider('Analytics', function () {
     var created = false,
+        skipGAInitialization = false,
         trackRoutes = true,
         accountId,
         displayFeatures,
@@ -22,6 +23,12 @@ angular.module('angular-google-analytics', [])
         linkerConfig = {'allowLinker': true};
 
     this._logs = [];
+
+    this.useExistingGA = function(doUseExisting) {
+      // do not initialize GA if instructed to use a pre-existing instance
+      skipGAInitialization = doUseExisting;
+      return true;
+    }
 
     // config methods
     this.setAccount = function (id) {
@@ -679,11 +686,13 @@ angular.module('angular-google-analytics', [])
         });
       };
 
-      // creates the ganalytics tracker
-      if (analyticsJS) {
-        _createAnalyticsScriptTag();
-      } else {
-        _createScriptTag();
+      if(!skipGAInitialization) {
+        // creates the ganalytics tracker
+        if (analyticsJS) {
+          _createAnalyticsScriptTag();
+        } else {
+          _createScriptTag();
+        }
       }
 
       // activates page tracking
